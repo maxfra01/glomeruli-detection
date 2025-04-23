@@ -1,0 +1,6 @@
+lxml==5.4.0
+numpy==2.2.5
+opencv-python==4.11.0.86
+openslide-bin==4.0.0.6
+openslide-python==1.4.1
+pillow==11.2.1
