@@ -23,6 +23,12 @@ Then, run the script:
 ./setup_env.sh
 ```
 
+Remember to launch the script in the **root** folder of the project. For example:
+```bash
+cd /path/to/project
+python src/segmentation/example_script.py
+```
+
 ## Contributors
 Here is the list of contributors to this project:
 - [Massimo Francios](www.github.com/maxfra01)
