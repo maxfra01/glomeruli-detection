@@ -10,12 +10,14 @@ from tqdm import tqdm
 
 WSI_PATH = "glomeruli_grading/"
 OUTPUT_PATH = "data/"
+TILE_SIZE = 2000 # Size of the tiles to extract
+STEP_SIZE = 2000 # Step size for sliding window
+SKIP_EMPTY = True # Whether to skip tiles with no glomeruli
 
 def parse_xml(xml_path):
     """
     This function parses the XML file and extracts the coordinates of the annotations.
     It returns a list of elements, each containing a list of coordinates for a glomerulus.
-    Each annotation is a tuple of (x, y) values.
     """
     
     tree = ET.parse(xml_path)
@@ -41,6 +43,19 @@ def extract_regions(
     level: int = 0,
     skip_empty: bool = True
 ):
+    """
+    Tiles a whole-slide image (WSI) and generates binary masks from XML annotations.
+    Handles edge padding and skips background tiles if specified.
+
+    Parameters:
+        svs_path (Path): Path to the .svs file.
+        xml_path (Path): Path to the corresponding XML annotation file.
+        output_dir (Path): Directory to save image tiles and mask tiles.
+        tile_size (int): Size of each square tile (default: 1024).
+        step_size (int): Sliding step between tiles (default: 1024).
+        level (int): WSI resolution level to extract from (default: 0).
+        skip_empty (bool): Skip tiles with no glomeruli (default: True).
+    """
     slide = openslide.OpenSlide(str(svs_path))
     width, height = slide.level_dimensions[level]
 
@@ -107,6 +122,6 @@ if __name__ == "__main__":
         if xml_file.exists():
             print(f"Processing: {base_id}")
             case_output = Path(OUTPUT_PATH) / base_id
-            extract_regions(svs_file, xml_file, case_output, tile_size=2000, step_size=2000, level=0, skip_empty=True)
+            extract_regions(svs_file, xml_file, case_output, tile_size=TILE_SIZE, step_size=STEP_SIZE, level=0, skip_empty=SKIP_EMPTY)
         else:
             print(f"XML not found for {base_id}, skipping.")
