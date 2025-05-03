@@ -12,7 +12,7 @@ WSI_PATH = "glomeruli_grading/"
 OUTPUT_PATH = "data/"
 TILE_SIZE = 2000 # Size of the tiles to extract
 STEP_SIZE = 2000 # Step size for sliding window
-SKIP_EMPTY = True # Whether to skip tiles with no glomeruli
+SKIP_EMPTY = True # Whether to skip tiles with no tissue
 
 def parse_xml(xml_path):
     """
@@ -90,8 +90,8 @@ def extract_regions(
             # Crop corresponding mask
             mask_crop = full_mask[y:y + tile_h, x:x + tile_w]
 
-            # Skip empty masks if requested
-            if skip_empty and np.count_nonzero(mask_crop) == 0:
+            # Skip tiles with no tissue if specified
+            if skip_empty and np.all(patch_np >= 240):
                 continue
 
             # Pad patch and mask if smaller than tile size
@@ -109,8 +109,7 @@ def extract_regions(
             print(f"Saved: {patch_path.name}")
             tile_id += 1
 
-
-            
+     
 if __name__ == "__main__":
     
     slides = sorted(Path(WSI_PATH).glob("*.svs"))
