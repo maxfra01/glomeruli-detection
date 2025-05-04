@@ -47,7 +47,7 @@ def extract_regions(
     Tiles a whole-slide image (WSI) and generates binary masks from XML annotations.
     Handles edge padding and skips background tiles if specified.
 
-    Parameters:
+    Args:
         svs_path (Path): Path to the .svs file.
         xml_path (Path): Path to the corresponding XML annotation file.
         output_dir (Path): Directory to save image tiles and mask tiles.
@@ -58,6 +58,7 @@ def extract_regions(
     """
     slide = openslide.OpenSlide(str(svs_path))
     width, height = slide.level_dimensions[level]
+    print(f"Width: {width}, Height: {height}")
 
     annotations = parse_xml(xml_path)
     slide_name = svs_path.stem
@@ -91,7 +92,7 @@ def extract_regions(
             mask_crop = full_mask[y:y + tile_h, x:x + tile_w]
 
             # Skip tiles with no tissue if specified
-            if skip_empty and np.all(patch_np >= 240):
+            if skip_empty and np.mean(patch_np) > 240:  # Assuming white areas have high mean pixel values
                 continue
 
             # Pad patch and mask if smaller than tile size
@@ -106,7 +107,7 @@ def extract_regions(
             cv2.imwrite(str(patch_path), patch_padded)
             cv2.imwrite(str(mask_path), mask_padded)
 
-            print(f"Saved: {patch_path.name}")
+            #print(f"Saved: {patch_path.name}")
             tile_id += 1
 
      
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     
     slides = sorted(Path(WSI_PATH).glob("*.svs"))
 
-    for svs_file in tqdm(slides):
+    for svs_file in tqdm(slides, desc="Processing WSI files"):
         base_id = svs_file.stem
         xml_file = Path(WSI_PATH) / f"{base_id}.xml"
 
@@ -124,3 +125,20 @@ if __name__ == "__main__":
             extract_regions(svs_file, xml_file, case_output, tile_size=TILE_SIZE, step_size=STEP_SIZE, level=0, skip_empty=SKIP_EMPTY)
         else:
             print(f"XML not found for {base_id}, skipping.")
+
+    files = sorted([
+        os.path.relpath(os.path.join(root, f), start=OUTPUT_PATH)
+        for root, _, filenames in os.walk(OUTPUT_PATH)
+        for f in filenames if f.endswith("mask.png")
+    ])
+    count_nonzero = 0
+    for f in tqdm(files, desc="Counting non-empty masks"):
+        mask = cv2.imread(os.path.join(OUTPUT_PATH, f), cv2.IMREAD_GRAYSCALE)
+        if np.count_nonzero(mask) > 0:
+            count_nonzero += 1
+    print(f"Total number of masks: {len(files)}")
+    print(f"Number of non-empty masks: {count_nonzero}")
+    print(f"Number of empty masks: {len(files) - count_nonzero}")
+    print(f"Percentage of empty masks: {(len(files) - count_nonzero) / len(files) * 100:.2f}%")
+    print(f"Percentage of non-empty masks: {count_nonzero / len(files) * 100:.2f}%")
+    print("Preprocess Done!")

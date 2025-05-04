@@ -57,7 +57,12 @@ def build_vgg19_segmentation(input_shape=(384, 384, 3), learning_rate=0.01, mome
     model.compile(
         optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
         loss='binary_crossentropy', 
-        metrics=['accuracy'])
+        metrics=[
+            'accuracy', 
+            tf.keras.metrics.MeanIoU(num_classes=num_classes),
+            tf.keras.metrics.Precision(),
+            tf.keras.metrics.Recall()
+        ])
     
     return model
 
