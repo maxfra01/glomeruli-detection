@@ -14,7 +14,6 @@ IMG_WIDTH = 384
 BATCH_SIZE = 32
 EPOCHS = 30
 LEARNING_RATE = 0.01
-MOMENTUM = 0.9
 PATIENCE = 5 # Early stopping patience
 
 if __name__ == "__main__":
@@ -40,13 +39,12 @@ if __name__ == "__main__":
     model = build_vgg19_segmentation(
         input_shape=(IMG_HEIGHT, IMG_WIDTH, 3),
         learning_rate=LEARNING_RATE,
-        momentum=MOMENTUM
     )
 
     os.makedirs("snapshots", exist_ok=True)
     os.makedirs("plots", exist_ok=True)
     
-    model_specs = f"model_lr{LEARNING_RATE}_mm{MOMENTUM}_bs{BATCH_SIZE}" # Model specifications
+    model_specs = f"model_lr{LEARNING_RATE}_bs{BATCH_SIZE}" # Model specifications
 
     # Train model
     history = model.fit( 

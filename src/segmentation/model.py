@@ -1,10 +1,10 @@
 import tensorflow as tf
 from keras.applications import VGG19
 from keras import layers, models
-from keras.optimizers import SGD
+from keras.optimizers import Adam
 
 
-def build_vgg19_segmentation(input_shape=(384, 384, 3), learning_rate=0.01, momentum=0.9, num_classes=2):
+def build_vgg19_segmentation(input_shape=(384, 384, 3), learning_rate=0.001, num_classes=2):
     """
     Builds a binary segmentation model using the VGG19 architecture as a backbone.
     It classifies each pixel in the input image into either glomerular or non-glomerular tissue (background).
@@ -55,7 +55,7 @@ def build_vgg19_segmentation(input_shape=(384, 384, 3), learning_rate=0.01, mome
     
     # Compile the model
     model.compile(
-        optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
+        optimizer=Adam(learning_rate=learning_rate),
         loss='binary_crossentropy', 
         metrics=[
             'accuracy', 
