@@ -9,7 +9,7 @@ def plot_random_samples(dataset: tf.data.Dataset, num_samples: int = 5):
         dataset: tf.data.Dataset object.
         num_samples: Number of random samples to plot.
     """
-    shuffled_dataset = dataset.shuffle(buffer_size=100) 
+    shuffled_dataset = dataset # If needed, shuffle the dataset 
     
     fig, ax = plt.subplots(2, num_samples, figsize=(15, 5))
     

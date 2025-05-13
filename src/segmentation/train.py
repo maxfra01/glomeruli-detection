@@ -3,6 +3,7 @@ from dataset import get_dataset
 import tensorflow as tf
 import os
 from utils import plot_random_samples, plot_training_history
+from data_augmentation import augment
 
 tf.random.set_seed(42)
 
@@ -13,27 +14,33 @@ IMG_HEIGHT = 384
 IMG_WIDTH = 384
 BATCH_SIZE = 32
 EPOCHS = 30
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 PATIENCE = 5 # Early stopping patience
 
 if __name__ == "__main__":
     
     dataset = get_dataset(DATASET_DIR, crop_size=(IMG_HEIGHT, IMG_WIDTH))
     
-    plot_random_samples(dataset, num_samples=5) # Visualize random samples
-
-    #TODO: add data augmentation
 
     total_size = tf.data.experimental.cardinality(dataset).numpy()
     train_size = int(0.64 * total_size)
     val_size = int(0.16 * total_size)
 
-    train_ds = dataset.take(train_size).shuffle(100).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+    train_ds = dataset.take(train_size)
     val_ds = dataset.skip(train_size).take(val_size).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
     test_ds = dataset.skip(train_size + val_size).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
+            
+    for _ in range(3):
+        train_ds_aug = train_ds.map(
+            lambda x, y: (augment(x, y)), num_parallel_calls=tf.data.AUTOTUNE
+        )
+        train_ds = train_ds.concatenate(train_ds_aug)
+    
+    train_ds = train_ds.shuffle(100).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
     
     print(f"Total samples: {total_size}")
-    print(f"Train: {train_size}, Val: {val_size}, Test: {total_size - train_size - val_size}")
+    print(f"Batch count")
+    print(f"Train: {tf.data.experimental.cardinality(train_ds).numpy()}, Val: {tf.data.experimental.cardinality(val_ds).numpy()}, Test: {tf.data.experimental.cardinality(test_ds).numpy()}")
 
     # Build model
     model = build_vgg19_segmentation(
