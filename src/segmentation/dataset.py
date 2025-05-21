@@ -50,7 +50,7 @@ def get_dataset(directory, crop_size=(384, 384)):
 if __name__ == "__main__":
     # Example usage
     print(os.getcwd())
-    dataset = get_dataset("./data/", batch_size=8)
+    dataset = get_dataset("./data/")
     for images, masks in dataset.take(1):
         print("Images shape:", images.shape)
         print("Masks shape:", masks.shape)
