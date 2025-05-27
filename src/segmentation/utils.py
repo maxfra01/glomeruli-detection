@@ -24,34 +24,33 @@ def plot_random_samples(dataset: tf.data.Dataset, num_samples: int = 5):
     plt.show()
     plt.close()
     
+
 def plot_training_history(history, save_path=None):
     """
-    Plot training and validation loss and accuracy.
-    
+    Plot training and validation metrics: loss, precision, recall, and IoU.
+
     Args:
         history: History object returned by model.fit().
+        save_path (str): Optional path to save the plot image.
     """
-    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
-    
-    # Loss
-    ax[0].plot(history.history["loss"], label="Train Loss")
-    ax[0].plot(history.history["val_loss"], label="Validation Loss")
-    ax[0].set_title("Loss")
-    ax[0].set_xlabel("Epochs")
-    ax[0].set_ylabel("Loss")
-    ax[0].legend()
-    
-    # Accuracy
-    ax[1].plot(history.history["accuracy"], label="Train Accuracy")
-    ax[1].plot(history.history["val_accuracy"], label="Validation Accuracy")
-    ax[1].set_title("Accuracy")
-    ax[1].set_xlabel("Epochs")
-    ax[1].set_ylabel("Accuracy")
-    ax[1].legend()
-    
-    plt.suptitle("Training History")
-    #plt.show()
+    metrics = ['loss', 'precision', 'recall', 'mean_io_u']
+    num_metrics = len(metrics)
+    fig, axs = plt.subplots(1, num_metrics, figsize=(5 * num_metrics, 5))
+
+    for i, metric in enumerate(metrics):
+        ax = axs[i]
+        ax.plot(history.history.get(metric, []), label=f"Train {metric.capitalize()}")
+        ax.plot(history.history.get(f"val_{metric}", []), label=f"Val {metric.capitalize()}")
+        ax.set_title(metric.replace('_', ' ').capitalize())
+        ax.set_xlabel("Epochs")
+        ax.set_ylabel(metric)
+        ax.legend()
+        ax.grid(True)
+
+    plt.suptitle("Training History", fontsize=16)
+
     if save_path:
         plt.savefig(save_path)
     plt.close()
+
         
