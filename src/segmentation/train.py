@@ -82,3 +82,20 @@ if __name__ == "__main__":
     # Evaluate on test set
     test_metrics = model.evaluate(test_ds)
     print("Test metrics:", dict(zip(model.metrics_names, test_metrics)))
+
+    # Perform manifold analysis on key layers
+    key_layers = [
+        "block1_pool",  # Early features
+        "block3_pool",  # Mid-level features
+        "block5_pool",  # High-level features
+        "conv2d_4"      # Final decoder layer
+    ]
+    
+    print("\nPerforming manifold analysis...")
+    analyze_layer_manifolds(
+        model=model,
+        dataset=test_ds,
+        layer_names=key_layers,
+        output_dir="manifold_analysis"
+    )
+    print("Manifold analysis complete. Check the 'manifold_analysis' directory for visualizations.")

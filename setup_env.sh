@@ -1,9 +1,10 @@
 #!/bin/bash
 
+
 ENV_NAME=".venv"
 
 echo "Creating virtual environment in $ENV_NAME"
-python3 -m venv $ENV_NAME
+python -m venv $ENV_NAME
 
 echo "Activating virtual environment"
 source $ENV_NAME/bin/activate
