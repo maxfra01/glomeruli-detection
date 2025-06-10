@@ -8,7 +8,7 @@ import math
 from tqdm import tqdm
 
 
-WSI_PATH = "glomeruli_grading/"
+WSI_PATH = "/home/det_user/s347811/glomeruli/glomeruli_grading/"
 OUTPUT_PATH = "data/"
 TILE_SIZE = 2000 # Size of the tiles to extract
 STEP_SIZE = 2000 # Step size for sliding window
@@ -113,8 +113,10 @@ def extract_regions(
      
 if __name__ == "__main__":
     
-    slides = sorted(Path(WSI_PATH).glob("*.svs"))
-
+    
+    slides = sorted(Path(WSI_PATH).glob("*.svs"))   
+    print(f"path: {Path(WSI_PATH)}")
+    print(f"Found {len(slides)} slides")
     for svs_file in tqdm(slides, desc="Processing WSI files"):
         base_id = svs_file.stem
         xml_file = Path(WSI_PATH) / f"{base_id}.xml"

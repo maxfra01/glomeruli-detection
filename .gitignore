@@ -6,3 +6,13 @@
 .env.test.local
 .env.production.local
 
+data
+results
+snapshots
+plots
+.ipynb_checkpoints
+log_combinedLoss.txt log_crossValidation.txt log_diceLossOnly.txt requirements.txt
+*.txt
+__pychache__
+src/segmentation/__pycache__/
+test_preview/

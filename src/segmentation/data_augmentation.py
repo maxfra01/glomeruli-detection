@@ -1,6 +1,17 @@
 import tensorflow as tf
 
 def augment(image, mask, crop_size=(384, 384)):
+    """
+        This function performs data augmentation on the image and mask.
+        
+        Args:
+            image: The image to augment.
+            mask: The mask to augment.
+            crop_size: The size of the crop to take from the image and mask.
+            
+        Returns:
+            The augmented image and mask.
+    """
     if tf.random.uniform(()) > 0.5:
         image = tf.image.flip_left_right(image)
         mask = tf.image.flip_left_right(mask)
