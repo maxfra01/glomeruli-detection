@@ -61,6 +61,15 @@ class ManifoldAnalyzer:
         
         return np.vstack(features), np.vstack(labels)
     
+    def extract_from_tensor(self, input_tensor: tf.Tensor, layer_name: str) -> tf.Tensor:
+        """
+        Extract features from a single input tensor using a specified layer.
+        """
+        feature_extractor = self.feature_extractors[layer_name]
+        features = feature_extractor(input_tensor)
+        return tf.reshape(features, (features.shape[0], -1))
+
+    
     def apply_dimensionality_reduction(self, 
                                      features: np.ndarray,
                                      method: str = 'tsne',
