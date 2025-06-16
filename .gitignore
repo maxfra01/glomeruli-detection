@@ -16,3 +16,9 @@ log_combinedLoss.txt log_crossValidation.txt log_diceLossOnly.txt requirements.t
 __pychache__
 src/segmentation/__pycache__/
 test_preview/
+
+glomeruli_grading.zip
+glomeruli_grading/
+data_clustering
+
+*__pycache__**
