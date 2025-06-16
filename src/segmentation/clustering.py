@@ -18,7 +18,7 @@ from manifold_analysis import ManifoldAnalyzer
 DATA_DIR = "./data/"
 MODEL_PATH = "./snapshots/model_lr0.0001_bs64_wd0.0001_ar5.keras"  # modello salvato con tf.keras.models.save_model()
 INPUT_SHAPE = (384, 384, 3)
-IMAGE_SIZE = (128, 128)
+IMAGE_SIZE = (384, 384)
 LAYER_NAME = "block3_conv4" # Other possibilities: 'block5_conv3', 'conv2d_4'
 
 #Load dataset
@@ -68,7 +68,7 @@ for image, mask in dataset:
 
         # Extract visual features
         glom_tensor = tf.convert_to_tensor(glom_img_resized[np.newaxis, ...], dtype=tf.float32)
-        feat = analyzer.extract_features_from_tensor(glom_tensor, LAYER_NAME)
+        feat = analyzer.extract_from_tensor(glom_tensor, LAYER_NAME)
         visual_features.append(feat.numpy().flatten())
 
         # Extract morphological features
@@ -103,7 +103,7 @@ kmeans = KMeans(n_clusters=3, random_state=42)
 kmeans_labels = kmeans.fit_predict(features_20d)
 
 #Method 2: DBSCAN
-dbscan = DBSCAN(eps=0.5, min_samples=5)
+dbscan = DBSCAN(eps=0.7, min_samples=3)
 dbscan_labels = dbscan.fit_predict(features_20d)
 
 #Method 3: Agglomerative Clustering
@@ -128,23 +128,25 @@ def plot_clusters(data, labels, title):
     plt.tight_layout()
     plt.show()
 
-plot_clusters(features_2d, kmeans, "KMeans Clustering")
-plot_clusters(features_2d, dbscan, "DBSCAN Clustering")
-plot_clusters(features_2d, agglo, "Agglomerative Clustering")
-plot_clusters(features_2d, gmm, "Gaussian Mixture Clustering")
+plot_clusters(features_2d, kmeans_labels, "KMeans Clustering")
+plot_clusters(features_2d, dbscan_labels, "DBSCAN Clustering")
+plot_clusters(features_2d, agglo_labels, "Agglomerative Clustering")
+plot_clusters(features_2d, gmm_labels, "Gaussian Mixture Clustering")
 
 # Evaluation metrics
-print(f"Silhouette Score (KMeans): {silhouette_score(features_20d, kmeans):.3f}")
-print(f"Calinski-Harabasz Score (KMeans): {calinski_harabasz_score(features_20d, kmeans):.2f}")
+print(f"Silhouette Score (KMeans): {silhouette_score(features_20d, kmeans_labels):.3f}")
+print(f"Calinski-Harabasz Score (KMeans): {calinski_harabasz_score(features_20d, kmeans_labels):.2f}")
 
-print(f"Silhouette Score (DBSCAN): {silhouette_score(features_20d, dbscan):.3f}")
-print(f"Calinski-Harabasz Score (DBSCAN): {calinski_harabasz_score(features_20d, dbscan):.2f}")
+n_clusters = len(set(dbscan_labels)) - (1 if -1 in dbscan_labels else 0)
+if n_clusters >= 2:
+    print(f"Silhouette Score (DBSCAN): {silhouette_score(features_20d, dbscan_labels):.3f}")
+    print(f"Calinski-Harabasz Score (DBSCAN): {calinski_harabasz_score(features_20d, dbscan_labels):.2f}")
+else:
+    print("DBSCAN found less than 2 clusters, Silhouette and Calinski-Harabasz Scores cannot be computed.")
+    
 
-print(f"Silhouette Score (Agglomerative): {silhouette_score(features_20d, agglo):.3f}")
-print(f"Calinski-Harabasz Score (Agglomerative): {calinski_harabasz_score(features_20d, agglo):.2f}")
+print(f"Silhouette Score (Agglomerative): {silhouette_score(features_20d, agglo_labels):.3f}")
+print(f"Calinski-Harabasz Score (Agglomerative): {calinski_harabasz_score(features_20d, agglo_labels):.2f}")
 
-print(f"Silhouette Score (GMM): {silhouette_score(features_20d, gmm):.3f}")
-print(f"Calinski-Harabasz Score (GMM): {calinski_harabasz_score(features_20d, gmm):.2f}")
-
-
-
+print(f"Silhouette Score (GMM): {silhouette_score(features_20d, gmm_labels):.3f}")
+print(f"Calinski-Harabasz Score (GMM): {calinski_harabasz_score(features_20d, gmm_labels):.2f}")
