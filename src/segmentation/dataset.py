@@ -52,4 +52,4 @@ def get_dataset(directory, crop_size=(384, 384)):
     dataset = tf.data.Dataset.from_tensor_slices((list(image_paths), list(mask_paths)))
     dataset = dataset.map(lambda img, msk: _decode_and_preprocess(img, msk, crop_size),
                           num_parallel_calls=tf.data.AUTOTUNE)
-    return dataset, list(image_paths), list(mask_paths)
+    return dataset

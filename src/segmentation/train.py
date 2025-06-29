@@ -16,7 +16,7 @@ IMG_HEIGHT = 384
 IMG_WIDTH = 384
 BATCH_SIZE = 16
 EPOCHS = 50
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 PATIENCE = 10 # Early stopping patience
 
 if __name__ == "__main__":
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     val_ds = dataset.skip(train_size).take(val_size).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
     test_ds = dataset.skip(train_size + val_size).batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
             
-    for _ in range(3):
+    for _ in range(4):
         train_ds_aug = train_ds.map(
             lambda x, y: (augment(x, y)), num_parallel_calls=tf.data.AUTOTUNE
         )
@@ -80,22 +80,7 @@ if __name__ == "__main__":
     plot_training_history(history, 'plots/' + model_specs + '.png') # Save training history
 
     # Evaluate on test set
-    test_metrics = model.evaluate(test_ds)
-    print("Test metrics:", dict(zip(model.metrics_names, test_metrics)))
-
-    # Perform manifold analysis on key layers
-    key_layers = [
-        "block1_pool",  # Early features
-        "block3_pool",  # Mid-level features
-        "block5_pool",  # High-level features
-        "conv2d_4"      # Final decoder layer
-    ]
-    
-    print("\nPerforming manifold analysis...")
-    analyze_layer_manifolds(
-        model=model,
-        dataset=test_ds,
-        layer_names=key_layers,
-        output_dir="manifold_analysis"
-    )
-    print("Manifold analysis complete. Check the 'manifold_analysis' directory for visualizations.")
+    test_metrics = model.evaluate(test_ds, return_dict=True)
+    for metric_name, value in test_metrics.items():
+        print(f"Test {metric_name}: {value:.4f}")
+   

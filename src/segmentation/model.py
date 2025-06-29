@@ -2,6 +2,46 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import VGG19
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import backend as K
+
+
+def binary_focal_loss(y_true, y_pred, alpha=0.25, gamma=2.0):
+    """
+    Alternative implementation of focal loss as a direct function.
+    
+    Args:
+        y_true: Ground truth binary masks
+        y_pred: Predicted probabilities
+        alpha: Weighting factor for positive class
+        gamma: Focusing parameter
+    
+    Returns:
+        Focal loss value
+    """
+    epsilon = tf.keras.backend.epsilon()
+    y_pred = tf.clip_by_value(y_pred, epsilon, 1.0 - epsilon)
+    
+    # Calculate cross entropy
+    ce_loss = -y_true * tf.math.log(y_pred) - (1 - y_true) * tf.math.log(1 - y_pred)
+    
+    # Calculate focal weight
+    p_t = tf.where(tf.equal(y_true, 1), y_pred, 1 - y_pred)
+    focal_weight = tf.pow(1 - p_t, gamma)
+    
+    # Calculate alpha weight
+    alpha_t = tf.where(tf.equal(y_true, 1), alpha, 1 - alpha)
+    
+    # Combine all components
+    focal_loss_val = alpha_t * focal_weight * ce_loss
+    
+    return tf.reduce_mean(focal_loss_val)
+
+def dice_loss(y_true, y_pred, smooth=1):
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    return 1 - (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+
 
 def build_segnet_vgg19_binary(input_shape=(384, 384, 3), learning_rate=1e-3):
     """
