@@ -29,7 +29,7 @@ print(f"Test set size (batch): {test_size}")
 
 # --- Load model ---
 if os.path.exists(MODEL_PATH):
-    print(f"Caricamento modello da {MODEL_PATH} ...")
+    print(f"CLoading model from {MODEL_PATH} ...")
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
@@ -41,7 +41,7 @@ if os.path.exists(MODEL_PATH):
         ]
     )
 else:
-    print(f"Modello non trovato in {MODEL_PATH}. Esco.")
+    print(f"Model non found in {MODEL_PATH}. Exit.")
     exit(1)
     
     

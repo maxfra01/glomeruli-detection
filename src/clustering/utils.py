@@ -3,8 +3,9 @@ import numpy as np
 import os
 from pathlib import Path
 from sklearn.metrics import silhouette_score
+from tiatoolbox.tools.stainnorm import MacenkoNormalizer
+from tqdm import tqdm
 
-# Seed for reproducibility
 np.random.seed(42)
 
 
@@ -14,20 +15,32 @@ def init_log_file(path=None):
         f.write("Clustering Evaluation Log\n")
         f.write("=" * 30 + "\n\n")
 
-def load_glomeruli_images(root_dir, image_size=(224, 224)):
+
+def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None):
     """
-    Load and process glomeruli images from multiple subfolders inside root_dir.
-    Each subfolder is expected to have 'images' and 'masks' directories.
+    Load and stain-normalize glomeruli images from multiple subfolders inside root_dir.
+    Apply binary mask and resize output images.
     
     Args:
-        root_dir (str or Path): Root directory containing RECHERCHEXXX subfolders.
-        image_size (tuple): Desired image size (width, height).
+        root_dir (str or Path): Path to root folder containing subfolders (RECHERCHEXXX).
+        image_size (tuple): Output image size (H, W).
+        target_img_path (str or Path): Path to target image for stain normalization.
         
     Returns:
-        np.ndarray: Array of processed images of shape (N, H, W, 3)
+        np.ndarray: Array of processed images (N, H, W, 3).
     """
     root_dir = Path(root_dir)
     processed_images = []
+
+    if not target_img_path or not Path(target_img_path).exists():
+        raise ValueError("Please provide a valid target_img_path for stain normalization.")
+
+    # Load and prepare target image for stain normalization
+    target_img = cv2.imread(str(target_img_path))
+    target_img = cv2.cvtColor(target_img, cv2.COLOR_BGR2RGB)
+
+    normalizer = MacenkoNormalizer()
+    normalizer.fit(target_img)
 
     for recherche_folder in sorted(root_dir.glob("RECHERCHE*")):
         images_dir = recherche_folder / "images"
@@ -40,7 +53,7 @@ def load_glomeruli_images(root_dir, image_size=(224, 224)):
         for img_path in sorted(images_dir.glob("*.png")):
             mask_path = masks_dir / img_path.name.replace(".png", "_mask.png")
             if not mask_path.exists():
-                print(f"Mask not found for {img_path.name} in {recherche_folder.name}, skipping.")
+                print(f"Skipping {img_path.name}: mask not found.")
                 continue
 
             img = cv2.imread(str(img_path))
@@ -49,19 +62,21 @@ def load_glomeruli_images(root_dir, image_size=(224, 224)):
             if img is None or mask is None:
                 continue
 
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            # Ensure mask is binary
+            try:
+                norm_img = normalizer.transform(img_rgb)
+            except Exception as e:
+                print(f"Normalization failed for {img_path.name}, skipping. Error: {e}")
+                continue
+
+            # Apply binary mask
             _, binary_mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+            masked_img = cv2.bitwise_and(norm_img, norm_img, mask=binary_mask)
 
-            # Apply mask (black background)
-            masked_img = cv2.bitwise_and(img, img, mask=binary_mask)
-
-            # Resize
-            masked_img = cv2.resize(masked_img, image_size)
-            masked_img = masked_img.astype(np.float32)
-
-            processed_images.append(masked_img)
+            # Resize and cast
+            final_img = cv2.resize(masked_img, image_size).astype(np.float32)
+            processed_images.append(final_img)
 
     return np.array(processed_images)
 
