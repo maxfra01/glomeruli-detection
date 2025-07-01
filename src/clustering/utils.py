@@ -3,9 +3,10 @@ import numpy as np
 import os
 from pathlib import Path
 from sklearn.metrics import silhouette_score
-from tiatoolbox.tools.stainnorm import MacenkoNormalizer
-from tqdm import tqdm
+#from tiatoolbox.tools.stainnorm import MacenkoNormalizer
 
+
+# Seed for reproducibility
 np.random.seed(42)
 
 
@@ -15,8 +16,7 @@ def init_log_file(path=None):
         f.write("Clustering Evaluation Log\n")
         f.write("=" * 30 + "\n\n")
 
-
-def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None):
+def load_glomeruli_images(root_dir, image_size=(384, 384)):
     """
     Load and stain-normalize glomeruli images from multiple subfolders inside root_dir.
     Apply binary mask and resize output images.
@@ -24,7 +24,6 @@ def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None)
     Args:
         root_dir (str or Path): Path to root folder containing subfolders (RECHERCHEXXX).
         image_size (tuple): Output image size (H, W).
-        target_img_path (str or Path): Path to target image for stain normalization.
         
     Returns:
         np.ndarray: Array of processed images (N, H, W, 3).
@@ -32,15 +31,15 @@ def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None)
     root_dir = Path(root_dir)
     processed_images = []
 
-    if not target_img_path or not Path(target_img_path).exists():
-        raise ValueError("Please provide a valid target_img_path for stain normalization.")
+#    if not target_img_path or not Path(target_img_path).exists():
+#        raise ValueError("Please provide a valid target_img_path for stain normalization.")
 
     # Load and prepare target image for stain normalization
-    target_img = cv2.imread(str(target_img_path))
-    target_img = cv2.cvtColor(target_img, cv2.COLOR_BGR2RGB)
+#    target_img = cv2.imread(str(target_img_path))
+#    target_img = cv2.cvtColor(target_img, cv2.COLOR_BGR2RGB)
 
-    normalizer = MacenkoNormalizer()
-    normalizer.fit(target_img)
+#    normalizer = MacenkoNormalizer()
+#    normalizer.fit(target_img)
 
     for recherche_folder in sorted(root_dir.glob("RECHERCHE*")):
         images_dir = recherche_folder / "images"
@@ -64,15 +63,15 @@ def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None)
 
             img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-            try:
-                norm_img = normalizer.transform(img_rgb)
-            except Exception as e:
-                print(f"Normalization failed for {img_path.name}, skipping. Error: {e}")
-                continue
+#            try:
+#                norm_img = normalizer.transform(img_rgb)
+#            except Exception as e:
+#                print(f"Normalization failed for {img_path.name}, skipping. Error: {e}")
+#                continue
 
             # Apply binary mask
             _, binary_mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
-            masked_img = cv2.bitwise_and(norm_img, norm_img, mask=binary_mask)
+            masked_img = cv2.bitwise_and(img_rgb, img_rgb, mask=binary_mask)
 
             # Resize and cast
             final_img = cv2.resize(masked_img, image_size).astype(np.float32)
@@ -80,7 +79,8 @@ def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None)
 
     return np.array(processed_images)
 
-def evaluate_clustering(features, labels, method_name="Clustering", log_file="results/log.txt"):
+
+def evaluate_clustering(features, labels, method_name="Clustering", log_file="results_new/log.txt"):
     n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
     lines = [f"[{method_name}]"]
     lines.append(f"Number of clusters: {n_clusters}")
@@ -98,6 +98,8 @@ def evaluate_clustering(features, labels, method_name="Clustering", log_file="re
 
     result = "\n".join(lines)
     print(result)
+    #TODO: remove
+    return n_clusters
 
     with open(log_file, "a") as f:
         f.write(result + "\n")
