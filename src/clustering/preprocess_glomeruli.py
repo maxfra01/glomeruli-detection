@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 WSI_PATH = "../glomeruli_grading/"
 OUTPUT_PATH = "data_clustering/"
-LEVEL = 0  # Livello di risoluzione dell'WSI (0 = full res)
+LEVEL = 0  # (0 = full res)
 
 def parse_xml(xml_path):
     tree = ET.parse(xml_path)
