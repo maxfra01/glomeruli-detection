@@ -6,9 +6,9 @@ from pathlib import Path
 import os
 from tqdm import tqdm
 
-WSI_PATH = "glomeruli_grading/"
+WSI_PATH = "../glomeruli_grading/"
 OUTPUT_PATH = "data_clustering/"
-LEVEL = 0  # = full res)
+LEVEL = 0  # Livello di risoluzione dell'WSI (0 = full res)
 
 def parse_xml(xml_path):
     tree = ET.parse(xml_path)
@@ -75,8 +75,4 @@ def main():
             print(f"XML missing for {svs_file.name}")
 
 if __name__ == "__main__":
-    
-    count_glom = 0
-    for path in Path(OUTPUT_PATH).glob("**/images/*.png"):
-        count_glom += 1
-    print(f"Total glomeruli cropped: {count_glom}")
+    main()

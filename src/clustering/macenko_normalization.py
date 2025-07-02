@@ -1,7 +1,10 @@
 import numpy as np
-import cv2 
+import cv2
 from sklearn.decomposition import PCA
-from typing import Tuple
+import matplotlib.pyplot as plt
+from typing import Tuple, Optional
+import warnings
+warnings.filterwarnings("ignore")
 
 class RobustMacenkoNormalizer:
     """
@@ -191,44 +194,24 @@ class RobustMacenkoNormalizer:
         
         return np.array(normalized_images)
 
-
-def macenko(images):
-    print("Applying Macenko normalization...")
-    try:
-        normalizer = RobustMacenkoNormalizer(
-            alpha=1.0,  # Usa percentili 1% e 99%
-            beta=0.15,  # Soglia OD
-            luminosity_threshold=0.8
-        )
-        
-        # Seleziona immagine target (quella con miglior contrasto)
-        target_idx = select_best_target_image(images)
-        print(f"Using image {target_idx} as normalization target")
-        
-        normalized_images = normalizer.fit_transform(images, target_idx=target_idx)
-        
-        print("Macenko normalization completed successfully!")
-        
-    except Exception as e:
-        print(f"Macenko normalization failed: {e}")
-        print("Using original images...")
-        normalized_images = images
-
-    return normalized_images
-
-def select_best_target_image(images):
-    """Seleziona l'immagine con miglior contrasto come target"""
-    best_contrast = 0
-    best_idx = 0
+def visualize_normalization(original_images, normalized_images, save_path="normalization_comparison.png"):
+    """Visualizza risultati della normalizzazione"""
+    n_samples = min(4, len(original_images))
     
-    for i, img in enumerate(images):
-        # Calcola contrasto come deviazione standard
-        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        contrast = np.std(gray)
-        
-        if contrast > best_contrast:
-            best_contrast = contrast
-            best_idx = i
+    fig, axes = plt.subplots(2, n_samples, figsize=(15, 8))
     
-    return best_idx
-
+    for i in range(n_samples):
+        # Originali
+        axes[0, i].imshow(original_images[i])
+        axes[0, i].set_title(f"Original {i}")
+        axes[0, i].axis('off')
+        
+        # Normalizzate
+        axes[1, i].imshow(normalized_images[i])
+        axes[1, i].set_title(f"Normalized {i}")
+        axes[1, i].axis('off')
+    
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Comparison saved to {save_path}")

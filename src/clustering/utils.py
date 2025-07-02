@@ -16,7 +16,7 @@ def init_log_file(path=None):
         f.write("Clustering Evaluation Log\n")
         f.write("=" * 30 + "\n\n")
 
-def load_glomeruli_images(root_dir, image_size=(384, 384)):
+def load_glomeruli_images(root_dir, image_size=(224, 224), target_img_path=None):
     """
     Load and stain-normalize glomeruli images from multiple subfolders inside root_dir.
     Apply binary mask and resize output images.
@@ -24,6 +24,7 @@ def load_glomeruli_images(root_dir, image_size=(384, 384)):
     Args:
         root_dir (str or Path): Path to root folder containing subfolders (RECHERCHEXXX).
         image_size (tuple): Output image size (H, W).
+        target_img_path (str or Path): Path to target image for stain normalization.
         
     Returns:
         np.ndarray: Array of processed images (N, H, W, 3).

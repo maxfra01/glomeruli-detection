@@ -290,7 +290,7 @@ def combine_features(vgg19_features, seg_features, morph_features, balance_facto
     scaler_seg = StandardScaler()
     scaler_morph = StandardScaler()
     
-    umap_vgg19 = UMAP(n_components=200)
+    umap_vgg19 = UMAP(n_components=75)
     vgg19_reduced = umap_vgg19.fit_transform(vgg19_features)
 
     vgg19_norm = scaler_vgg19.fit_transform(vgg19_reduced)
@@ -298,7 +298,7 @@ def combine_features(vgg19_features, seg_features, morph_features, balance_facto
     
     # Handle segmentation features if available
     if seg_features is not None:
-        umap_seg = UMAP(n_components=200)
+        umap_seg = UMAP(n_components=75)
         seg_reduced = umap_seg.fit_transform(seg_features)
 
         seg_norm = scaler_seg.fit_transform(seg_reduced)

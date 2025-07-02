@@ -22,3 +22,4 @@ glomeruli_grading/
 data_clustering
 
 *__pycache__**
+.DS_Store

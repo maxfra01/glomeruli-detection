@@ -33,7 +33,7 @@ def plot_cluster_examples(images, labels, n_clusters=6, samples_per_cluster=3, a
 
     plt.suptitle(f"Sample Images from Clusters ({algorithm_name})", fontsize=16)
     plt.tight_layout()
-    os.makedirs("results", exist_ok=True)
-    plt.savefig(f"results/cluster_examples_{algorithm_name}.png", dpi=300)
+    os.makedirs("results_new", exist_ok=True)
+    plt.savefig(f"results_new/{algorithm_name}.png", dpi=300)
     #plt.show()
     plt.close()
